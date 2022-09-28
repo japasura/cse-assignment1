@@ -53,54 +53,137 @@ void add_song ( playlist_t *playlist, int song_id, int where ) {
     }
 }
 
-void delete_song ( playlist_t *playlist, int song_id ) // TODO: remove song id from the playlist
-{
+/* remove song id from the playlist */
+void delete_song ( playlist_t *playlist, int song_id ) {
+    delete_node( playlist->list, song_id );
 }
 
-song_t *search_song ( playlist_t *playlist,
-                      int song_id ) // TODO: return a pointer to the node where the song id is present in the playlist
-{
+/*
+ * return a pointer to the node where the song id is present in the playlist
+ */
+song_t *search_song ( playlist_t *playlist, int song_id ) {
+    return search( playlist->list, song_id );
 }
 
-void search_and_play ( playlist_t *playlist,
-                       int song_id ) // TODO: play the song with given song_id from the list(no need to bother about the queue. Call to this function should always play the given song and further calls to play_next and play_previous)
-{
+/* play the song with given song_id from the list(no need to bother about the queue.
+ *      Call to this function should always play the given song and further calls to play_next
+ *      and play_previous)
+ */
+void search_and_play ( playlist_t *playlist, int song_id ) {
+    song_t *song = search_song( playlist, song_id );
+    playlist->last_song = song;
+    play_song( song->data );
 }
 
-void play_next ( playlist_t *playlist,
-                 music_queue_t *q ) // TODO: play the next song in the linked list if the queue is empty. If the queue if not empty, play from the queue
-{
+void play_from_playlist ( playlist_t *playlist ) {
+    if ( playlist->last_song && playlist->last_song->next ) {
+        play_song( playlist->last_song->data );
+        playlist->last_song = playlist->last_song->next;
+    } else if ( playlist->list->size ) {
+        play_song( playlist->list->head->data );
+        playlist->last_song = playlist->list->head;
+    }
 }
 
-void play_previous ( playlist_t *playlist ) // TODO: play the previous song from the linked list
-{
+/*  play the next song in the linked list if the queue is empty.
+ *  If the queue if not empty, play from the queue
+ */
+void play_next ( playlist_t *playlist, music_queue_t *q ) {
+    if ( empty( q )) {
+        play_from_playlist( playlist );
+    } else {
+        play_from_queue( q );
+    }
 }
 
-void play_from_queue ( music_queue_t *q ) // TODO: play a song from the queue
-{
+/*
+ * play the previous song from the linked list
+ */
+void play_previous ( playlist_t *playlist ) {
+    if ( playlist->last_song ) {
+        play_song( playlist->last_song->prev->data );
+        playlist->last_song = playlist->last_song->prev;
+    } else if ( !is_empty( playlist->list )) {
+        playlist->last_song = playlist->list->tail;
+        play_song( playlist->last_song->data );
+    }
 }
 
-void insert_to_queue ( music_queue_t *q, int song_id ) // TODO: insert a song id to the queue
-{
+/* play a song from the queue */
+void play_from_queue ( music_queue_t *q ) {
+    int songid = dequeue( q );
+    play_song( songid );
 }
 
-void reverse (
-        playlist_t *playlist ) // TODO: reverse the order of the songs in the given playlist. (Swap the nodes, not data)
-{
+/* insert a song id to the queue */
+void insert_to_queue ( music_queue_t *q, int song_id ) {
+    enqueue( q, song_id );
 }
 
-void k_swap ( playlist_t *playlist,
-              int k ) // TODO: swap the node at position i with node at position i+k upto the point where i+k is less than the size of the linked list
-{
+/* reverse the order of the songs in the given playlist. (Swap the nodes, not data) */
+void reverse ( playlist_t *playlist ) {
+    song_t *cur1, *tmp;
+    list_t *list = playlist->list;
+    cur1 = list->head;
+
+    while ( cur1 ) {
+        tmp = cur1->next;
+        cur1->next = cur1->prev;
+        cur1->prev = tmp;
+        cur1 = cur1->prev;
+    }
+    cur1 = list->head;
+    list->head = list->tail;
+    list->tail = cur1;
 }
 
-void shuffle ( playlist_t *playlist, int k ) // TODO: perform k_swap and reverse
-{
+/*
+ * swap the node at position i with node at position i+k
+ * upto the point where i+k is less than the size of the linked list
+ */
+void k_swap ( playlist_t *playlist, int k ) {
+    list_t *list = playlist->list;
+    song_t *song = list->head;
+    song_t *toSwap = list->head;
+    song_t *tmp;
+    for ( int i = 0; i < list->size; i += k ) {
+        for ( int j = 0; j < k; j++ ) {
+            toSwap = toSwap->next;
+        }
+        toSwap->prev->next = song;
+        toSwap->next->prev = song;
+        song->prev->next = toSwap;
+        song->next->prev = toSwap;
+        tmp = toSwap;
+        toSwap = song;
+        song = tmp;
+    }
 }
 
-song_t *
-debug ( playlist_t *playlist ) // TODO: if the given linked list has a cycle, return the start of the cycle, else return null. Check cycles only in forward direction i.e with the next pointer. No need to check for cycles in the backward pointer.
-{
+/* perform k_swap and reverse */
+void shuffle ( playlist_t *playlist, int k ) {
+    k_swap( playlist, k );
+    reverse( playlist );
+}
+
+/* if the given linked list has a cycle,
+ *  return the start of the cycle, else return null.
+ *  Check cycles only in forward direction i.e with the next pointer.
+ *  No need to check for cycles in the backward pointer.
+ */
+song_t *debug ( playlist_t *playlist ) {
+    list_t *list = playlist->list;
+    node_t *slow = list->head, *fast = list->head;
+
+    while ( slow && fast && fast->next ) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast){
+            return slow;
+        }
+    }
+    return NULL;
+
 }
 
 void display_playlist ( playlist_t *p ) // Displays the playlist

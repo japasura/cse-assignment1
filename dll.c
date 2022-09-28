@@ -16,10 +16,16 @@ node_t *create_item ( int val ) {
     rv->data = val;
 }
 
-void insert_front ( list_t *list, int data )  /* inserts data to the beginning of the linked list */ {
-    list->head->prev = create_item( data );
-    list->head->prev->next = list->head;
-    list->head = list->head->prev;
+/* inserts data to the beginning of the linked list */
+void insert_front ( list_t *list, int data ) {
+    if (list->size){
+        list->head->prev = create_item( data );
+        list->head->prev->next = list->head;
+        list->head = list->head->prev;
+    } else {
+        list->head = create_item(data);
+        list->tail = list->head;
+    }
     list->size++;
 }
 
@@ -27,6 +33,7 @@ void insert_back ( list_t *list, int data ) /* inserts data to the end of the li
     list->tail->next = create_item( data );
     list->tail->next->prev = list->tail;
     list->tail = list->tail->next;
+    list->tail->next = NULL;
     list->size++;
 }
 
@@ -58,12 +65,13 @@ void delete_front ( list_t *list ) {
     list->head = tmp;
     list->size--;
 }
+
 /*
  * delete the end node from the linked list.
  */
-void delete_back ( list_t *list )  {
-    node_t * tmp = list->tail->prev;
-    free(list->tail);
+void delete_back ( list_t *list ) {
+    node_t *tmp = list->tail->prev;
+    free( list->tail );
     list->tail = tmp;
     tmp->next = NULL;
     list->size--;
@@ -73,11 +81,11 @@ void delete_back ( list_t *list )  {
  * TODO: delete the node with “data” from the linked list.
  */
 void delete_node ( list_t *list, int data ) {
-    node_t * cur = search(list, data);
-    if (cur){ // guard against data not existing
-        cur->prev->next = cur->next;
-        cur->next->prev = cur->prev;
-        free(cur);
+    node_t *cur = search( list, data );
+    if ( cur ) { // guard against data not existing
+        cur->prev && (cur->prev->next = cur->next);
+        cur->next && (cur->next->prev = cur->prev);
+        free( cur );
         list->size--;
     }
 }
@@ -86,8 +94,8 @@ void delete_node ( list_t *list, int data ) {
  * returns the pointer to the node with “data” field. Return NULL if not found.
 */
 node_t *search ( list_t *list, int data ) {
-    node_t * cur = list->head;
-    while (cur && cur->data != data){
+    node_t *cur = list->head;
+    while ( cur && cur->data != data ) {
         cur = cur->next;
     }
     return cur;
