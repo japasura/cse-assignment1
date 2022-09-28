@@ -18,7 +18,7 @@ int dequeue ( queue_t *q );    // return the data at the front of a queue
 int empty ( queue_t *q ); // return if the queue is empty
 int front ( queue_t *q ); // return the data at the front of a queue
 int queue_size ( queue_t *q ); // returns the number of elements in the queue
-void delete_queue ( ); // empty the contents of the queue
+void delete_queue ( queue_t *q ); // empty the contents of the queue
 
 
 #endif
