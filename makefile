@@ -1,4 +1,4 @@
-all: compile
+all: clean compile
 compile: a.out
 a.out: main.o dll.o queue.o music_player.o
 	gcc main.o dll.o queue.o music_player.o

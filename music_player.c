@@ -51,11 +51,13 @@ void add_song ( playlist_t *playlist, int song_id, int where ) {
             break;
         }
     }
+    playlist->num_songs++;
 }
 
 /* remove song id from the playlist */
 void delete_song ( playlist_t *playlist, int song_id ) {
     delete_node( playlist->list, song_id );
+    playlist->num_songs--;
 }
 
 /*
@@ -71,8 +73,10 @@ song_t *search_song ( playlist_t *playlist, int song_id ) {
  */
 void search_and_play ( playlist_t *playlist, int song_id ) {
     song_t *song = search_song( playlist, song_id );
-    playlist->last_song = song;
-    play_song( song->data );
+    if ( song ) {
+        play_song( song->data );
+        playlist->last_song = song;
+    }
 }
 
 void play_from_playlist ( playlist_t *playlist ) {
@@ -100,7 +104,7 @@ void play_next ( playlist_t *playlist, music_queue_t *q ) {
  * play the previous song from the linked list
  */
 void play_previous ( playlist_t *playlist ) {
-    if ( playlist->last_song ) {
+    if ( playlist->last_song && playlist->last_song->prev ) {
         play_song( playlist->last_song->prev->data );
         playlist->last_song = playlist->last_song->prev;
     } else if ( !is_empty( playlist->list )) {
@@ -147,16 +151,39 @@ void k_swap ( playlist_t *playlist, int k ) {
     song_t *toSwap = list->head;
     song_t *tmp;
     for ( int i = 0; i < list->size; i += k ) {
-        for ( int j = 0; j < k; j++ ) {
+        for ( int j = 0; (j < k) && (toSwap); j++ ) {
             toSwap = toSwap->next;
         }
-        toSwap->prev->next = song;
-        toSwap->next->prev = song;
-        song->prev->next = toSwap;
-        song->next->prev = toSwap;
-        tmp = toSwap;
-        toSwap = song;
-        song = tmp;
+        if ( toSwap ) {
+            if ( toSwap->next ) {
+                toSwap->next->prev = song;
+            } else {
+                list->tail = song;
+            }
+
+            if ( toSwap->prev ) {
+                toSwap->prev->next = song;
+            }
+
+            if ( song->prev ) {
+                song->prev->next = toSwap;
+            } else {
+                list->head = toSwap;
+            }
+
+            song->next->prev = toSwap;
+
+            tmp = song->next;
+            song->next = toSwap->next;
+            toSwap->next = tmp;
+
+            tmp = song->prev;
+            song->prev = toSwap->prev;
+            toSwap->prev = tmp;
+
+        } else {
+            break;
+        }
     }
 }
 
@@ -178,7 +205,7 @@ song_t *debug ( playlist_t *playlist ) {
     while ( slow && fast && fast->next ) {
         slow = slow->next;
         fast = fast->next->next;
-        if (slow == fast){
+        if ( slow == fast ) {
             return slow;
         }
     }
