@@ -64,6 +64,7 @@ int main(){
         }
         else if(strcmp(operation, "search_and_play") == 0){
             fscanf(fptr,"%d", &song_id);
+//            printf("%p test", p);
             search_and_play(p, song_id);
         }
         else if(strcmp(operation, "play_next") == 0){

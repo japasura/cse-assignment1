@@ -25,16 +25,26 @@ void insert_front ( list_t *list, int data ) {
     } else {
         list->head = create_item(data);
         list->tail = list->head;
+        list->tail->next = NULL;
+        list->tail->prev = NULL;
     }
     list->size++;
 }
 
 void insert_back ( list_t *list, int data ) /* inserts data to the end of the linked list */ {
-    list->tail->next = create_item( data );
-    list->tail->next->prev = list->tail;
-    list->tail = list->tail->next;
-    list->tail->next = NULL;
-    list->size++;
+    if (list->size){
+        list->tail->next = create_item( data );
+        list->tail->next->prev = list->tail;
+        list->tail = list->tail->next;
+        list->tail->next = NULL;
+        list->size++;
+    } else {
+        list->head = create_item(data);
+        list->tail = list->head;
+        list->tail->next = NULL;
+        list->tail->prev = NULL;
+        list->size = 1;
+    }
 }
 
 /*
@@ -49,7 +59,7 @@ void insert_after ( list_t *list, int data, int prev ) {
         node_t *tmp = cur->next;
         cur->next = create_item( data );
         cur->next->next = tmp;
-        tmp->prev = cur;
+        tmp && (tmp->prev = cur);
         cur->next->prev = cur;
         list->size++;
     }
@@ -82,12 +92,19 @@ void delete_back ( list_t *list ) {
  */
 void delete_node ( list_t *list, int data ) {
     node_t *cur = search( list, data );
+    if (cur == list->head){
+        list->head = cur->next;
+    }
+    if (cur == list->tail){
+        list->tail = cur->prev;
+    }
     if ( cur ) { // guard against data not existing
         cur->prev && (cur->prev->next = cur->next);
         cur->next && (cur->next->prev = cur->prev);
         free( cur );
         list->size--;
     }
+
 }
 
 /*
