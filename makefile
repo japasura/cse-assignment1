@@ -1,3 +1,4 @@
+all: compile
 compile: a.out
 a.out: main.o dll.o queue.o music_player.o
 	gcc main.o dll.o queue.o music_player.o
@@ -10,7 +11,7 @@ queue.o : queue.c dll.h queue.h
 music_player.o : main.c dll.h queue.h music_player.h
 	gcc -c music_player.c
 
-run:
+run: compile
 	clear
 	./a.out
 	./a.out > output.txt
