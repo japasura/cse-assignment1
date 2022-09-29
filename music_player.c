@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define MAP_SIZE 1523
+
 song_t *swapAndIterate ( list_t *list, song_t *song, song_t *toSwap );
 
 playlist_t *create_playlist ( ) // return a newly created doubly linked list
@@ -215,17 +217,17 @@ void shuffle ( playlist_t *playlist, int k ) {
  *  No need to check for cycles in the backward pointer.
  */
 song_t *debug ( playlist_t *playlist ) {
-    list_t *list = playlist->list;
-    node_t *slow = list->head, *fast = list->head;
-
-    while ( slow && fast && fast->next ) {
-        slow = slow->next;
-        fast = fast->next->next;
-        if ( slow == fast ) {
-            return slow;
+    int hmap[MAP_SIZE] = {};
+    song_t *cur = playlist->list->head;
+    while ( cur ) {
+        long ind = (( long ) cur) % MAP_SIZE;
+        if ( hmap[ind] ){
+            return cur;
+        } else {
+            hmap[ind] = 1;
         }
+        cur = cur->next;
     }
-    return NULL;
 
 }
 
