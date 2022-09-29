@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+song_t *swapAndIterate ( list_t *list, song_t *song, song_t *toSwap );
+
 playlist_t *create_playlist ( ) // return a newly created doubly linked list
 {
     // DO NOT MODIFY!!!
@@ -141,6 +143,14 @@ void reverse ( playlist_t *playlist ) {
     list->tail = cur1;
 }
 
+song_t *getElAtIndex ( list_t *list, int index ) {
+    song_t *cur = list->head;
+    while ( index-- && cur ) {
+        cur = cur->next;
+    }
+    return cur;
+}
+
 /*
  * swap the node at position i with node at position i+k
  * upto the point where i+k is less than the size of the linked list
@@ -148,43 +158,49 @@ void reverse ( playlist_t *playlist ) {
 void k_swap ( playlist_t *playlist, int k ) {
     list_t *list = playlist->list;
     song_t *song = list->head;
-    song_t *toSwap = list->head;
+    song_t *toSwap;
     song_t *tmp;
-    for ( int i = 0; i < list->size; i += k ) {
-        for ( int j = 0; (j < k) && (toSwap); j++ ) {
-            toSwap = toSwap->next;
-        }
+    for ( int i = 0; i <= (list->size); i++ ) {
+        toSwap = getElAtIndex(list, i+k);
+        tmp = song->next;
         if ( toSwap ) {
-            if ( toSwap->next ) {
-                toSwap->next->prev = song;
-            } else {
-                list->tail = song;
-            }
-
-            if ( toSwap->prev ) {
-                toSwap->prev->next = song;
-            }
-
-            if ( song->prev ) {
-                song->prev->next = toSwap;
-            } else {
-                list->head = toSwap;
-            }
-
-            song->next->prev = toSwap;
-
-            tmp = song->next;
-            song->next = toSwap->next;
-            toSwap->next = tmp;
-
-            tmp = song->prev;
-            song->prev = toSwap->prev;
-            toSwap->prev = tmp;
-
+            swapAndIterate( list, song, toSwap );
         } else {
             break;
         }
+        song = tmp;
     }
+}
+
+song_t *swapAndIterate ( list_t *list, song_t *song, song_t *toSwap ) {
+    song_t *toSwp_nxt = toSwap->next;
+    song_t *tmp;
+    if ( toSwap->next ) {
+        toSwap->next->prev = song;
+    } else {
+        list->tail = song;
+    }
+
+    if ( toSwap->prev ) {
+        toSwap->prev->next = song;
+    }
+
+    if ( song->prev ) {
+        song->prev->next = toSwap;
+    } else {
+        list->head = toSwap;
+    }
+
+    song->next->prev = toSwap;
+
+    tmp = song->next;
+    song->next = toSwap->next;
+    toSwap->next = tmp;
+
+    tmp = song->prev;
+    song->prev = toSwap->prev;
+    toSwap->prev = tmp;
+    return toSwp_nxt;
 }
 
 /* perform k_swap and reverse */
