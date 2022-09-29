@@ -228,6 +228,7 @@ song_t *debug ( playlist_t *playlist ) {
         }
         cur = cur->next;
     }
+    return NULL;
 
 }
 
