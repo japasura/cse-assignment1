@@ -14,6 +14,7 @@ list_t *create_list ( ) /* return a newly created empty doubly linked list */ {
 node_t *create_item ( int val ) {
     node_t *rv = ( node_t * ) malloc( sizeof( list_t ));
     rv->data = val;
+    return rv;
 }
 
 /* inserts data to the beginning of the linked list */
