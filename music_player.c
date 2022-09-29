@@ -161,7 +161,7 @@ void k_swap ( playlist_t *playlist, int k ) {
     song_t *toSwap;
     song_t *tmp;
     for ( int i = 0; i <= (list->size); i++ ) {
-        toSwap = getElAtIndex(list, i+k);
+        toSwap = getElAtIndex( list, i + k );
         tmp = song->next;
         if ( toSwap ) {
             swapAndIterate( list, song, toSwap );
